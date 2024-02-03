@@ -7,6 +7,7 @@ public struct CubeTextureData
 {
     public int textureAtlasId;
     public float cellSize;
+
     [Tooltip("x = Column Index, y = Row Index")]
     public Vector2Int frontUV;
 

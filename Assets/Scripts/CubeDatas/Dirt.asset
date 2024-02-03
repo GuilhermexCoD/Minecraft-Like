@@ -16,7 +16,7 @@ MonoBehaviour:
   textureData:
     textureAtlasId: 0
     cellSize: 16
-    frontUV: {x: 8, y: 25}
+    frontUV: {x: 8, y: 28}
     topUV: {x: 8, y: 24}
     backUV: {x: 8, y: 25}
     bottomUV: {x: 8, y: 26}
