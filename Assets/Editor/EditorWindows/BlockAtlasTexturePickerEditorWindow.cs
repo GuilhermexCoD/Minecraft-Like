@@ -146,8 +146,6 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
         if (selectedBlockData == null)
             return;
 
-        var cellSize = selectedBlockData.textureData.cellSize;
-
         Debug.Log($"x: {evt.localPosition.x} y: {evt.localPosition.y} !y: {_textureUvSelector.image.width - evt.localPosition.y}");
 
         var coordinate = _textureUvSelector.CalculateImageCoordinates(evt.localPosition);
@@ -195,7 +193,6 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
         if (_inspectorPanel == null)
             return;
 
-        Debug.Log("teste");
         _inspectorPanel.Clear();
 
         // Get the selected sprite
@@ -205,9 +202,9 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
 
         // Add a new Image control and display the sprite
         var inspectorElement = new InspectorElement(selected);
-        var childs = inspectorElement.Children();
+        var textureDataUI = inspectorElement.Q<CubeTextureDataUI>();
+        textureDataUI.OnFaceButtonPressed += OnFaceButtonPressed;
 
-        //var textureData = inspectorElement.Q<CubeTextureDataDrawer>();
         _inspectorPanel.Add(inspectorElement);
 
         var buttonShowSelectedUVs = new Button(ShowSelectedUVs)
@@ -216,104 +213,50 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
         };
         _inspectorPanel.Add(buttonShowSelectedUVs);
 
-        //var buttonSetFront = CreateButton("Set Front UV", () =>
-        //{
-        //    _textureUvSelector.GetCoordinatesOnMouseClick((coordinate) =>
-        //    {
-        //        if (TryGetSelectedBlockData(out var blockData))
-        //        {
-        //            SaveUVCoordinates(coordinate, ref blockData.textureData.frontUV);
-
-        //            EditorUtility.SetDirty(blockData);
-        //        }
-        //    });
-        //});
-        //_inspectorPanel.Add(buttonSetFront);
-
-        //var buttonSetTop = CreateButton("Set Top UV", () =>
-        //{
-        //    _textureUvSelector.GetCoordinatesOnMouseClick((coordinate) =>
-        //    {
-        //        if (TryGetSelectedBlockData(out var blockData))
-        //        {
-        //            SaveUVCoordinates(coordinate, ref blockData.textureData.topUV);
-
-        //            EditorUtility.SetDirty(blockData);
-        //        }
-        //    });
-        //});
-        //_inspectorPanel.Add(buttonSetTop);
-
-        //var buttonSetBack = CreateButton("Set Back UV", () =>
-        //{
-        //    _textureUvSelector.GetCoordinatesOnMouseClick((coordinate) =>
-        //    {
-        //        if (TryGetSelectedBlockData(out var blockData))
-        //        {
-        //            SaveUVCoordinates(coordinate, ref blockData.textureData.backUV);
-
-        //            EditorUtility.SetDirty(blockData);
-        //        }
-        //    });
-        //});
-        //_inspectorPanel.Add(buttonSetBack);
-
-        //var buttonSetBottom = CreateButton("Set Bottom UV", () =>
-        //{
-        //    _textureUvSelector.GetCoordinatesOnMouseClick((coordinate) =>
-        //    {
-        //        if (TryGetSelectedBlockData(out var blockData))
-        //        {
-        //            SaveUVCoordinates(coordinate, ref blockData.textureData.bottomUV);
-
-        //            EditorUtility.SetDirty(blockData);
-        //        }
-        //    });
-        //});
-        //_inspectorPanel.Add(buttonSetBottom);
-
-        //var buttonSetRight = CreateButton("Set Right UV", () =>
-        //{
-        //    _textureUvSelector.GetCoordinatesOnMouseClick((coordinate) =>
-        //    {
-        //        if (TryGetSelectedBlockData(out var blockData))
-        //        {
-        //            SaveUVCoordinates(coordinate, ref blockData.textureData.rightUV);
-
-        //            EditorUtility.SetDirty(blockData);
-        //        }
-        //    });
-        //});
-        //_inspectorPanel.Add(buttonSetRight);
-
-        //var buttonSetLeft = CreateButton("Set Left UV", () =>
-        //{
-        //    _textureUvSelector.GetCoordinatesOnMouseClick((coordinate) =>
-        //    {
-        //        if (TryGetSelectedBlockData(out var blockData))
-        //        {
-        //            SaveUVCoordinates(coordinate, ref blockData.textureData.leftUV);
-
-        //            EditorUtility.SetDirty(blockData);
-        //        }
-        //    });
-        //});
-        //_inspectorPanel.Add(buttonSetLeft);
     }
 
-    private void SaveUVCoordinates(Vector2Int coordinate, ref Vector2Int uv)
+    private void OnFaceButtonPressed(object sender, FaceArgs e)
     {
-        var maxRows = _textureUvSelector.GetMaxRows() - 1;
-        uv = new Vector2Int(coordinate.x, maxRows - coordinate.y);
-        Debug.Log($"Selected Coordinate:{coordinate} | UV: {uv}");
-    }
+        Debug.Log($"Pressed {e.faceOrientation}");
+        var localFaceOrientation = e.faceOrientation;
 
-    private Button CreateButton(string text, Action clickAction)
-    {
-        return new Button(clickAction)
+        _textureUvSelector.GetCoordinatesOnMouseClick((coordinate) =>
         {
-            text = text
-        };
+            if (TryGetSelectedBlockData(out var blockData))
+            {
+                var maxRows = _textureUvSelector.GetMaxRows() - 1;
+                var uv = new Vector2Int(coordinate.x, maxRows - coordinate.y);
+                Debug.Log($"{localFaceOrientation} Selected Coordinate:{coordinate} | UV: {uv}");
+
+                switch (localFaceOrientation)
+                {
+                    case FaceOrientation.Front:
+                        blockData.textureData.frontUV = uv;
+                        break;
+                    case FaceOrientation.Top:
+                        blockData.textureData.topUV = uv;
+                        break;
+                    case FaceOrientation.Back:
+                        blockData.textureData.backUV = uv;
+                        break;
+                    case FaceOrientation.Bottom:
+                        blockData.textureData.bottomUV = uv;
+                        break;
+                    case FaceOrientation.Right:
+                        blockData.textureData.rightUV = uv;
+                        break;
+                    case FaceOrientation.Left:
+                        blockData.textureData.leftUV = uv;
+                        break;
+                    default:
+                        break;
+                }
+
+                EditorUtility.SetDirty(blockData);
+            }
+            
+        });
+        
     }
 
     private bool TryGetSelectedBlockData(out BlockData blockData)

@@ -32,11 +32,22 @@ public class TextureUvSelector : Image
 
     public void GetCoordinatesOnMouseClick(Action<Vector2Int> coordinatesCallback)
     {
+        CancelGetCoordinatesOnMouseClick();
+
         Debug.Log("Waiting for input");
 
         _coordinatesCallback = coordinatesCallback;
 
         RegisterCallback<PointerDownEvent>(OnSelectedCoordinate);
+    }
+
+    public void CancelGetCoordinatesOnMouseClick()
+    {
+        if (_coordinatesCallback != null)
+        {
+            UnregisterCallback<PointerDownEvent>(OnSelectedCoordinate);
+            _coordinatesCallback = null;
+        }
     }
 
     private void OnSelectedCoordinate(PointerDownEvent evt)
