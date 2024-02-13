@@ -10,7 +10,9 @@ public class TextureUvSelector : Image
     private float _cellSize;
     private Action<Vector2Int> _coordinatesCallback;
 
-    private Dictionary<Vector2Int, Box> _coordinateBoxes = new();
+    private Dictionary<Vector2Int, SelectionBox> _coordinateBoxes = new();
+    private ResizerManipulator _resizerManipulator;
+    private Vector2 _sizeMultiplier = Vector2.one;
 
     public TextureUvSelector(Texture2D texture, float cellSize = 16f)
     {
@@ -21,6 +23,20 @@ public class TextureUvSelector : Image
         style.height = _texture.height;
         style.width = _texture.width;
         image = _texture;
+        _sizeMultiplier = Vector2.one;
+
+        _resizerManipulator = new ResizerManipulator(new Vector2(_texture.width, _texture.height), 4f);
+        _resizerManipulator.onResize += OnResizeChange;
+        this.AddManipulator(_resizerManipulator);
+    }
+
+    private void OnResizeChange(object sender, ResizeArgs e)
+    {
+        _sizeMultiplier = e.sizeMultiplier;
+
+        foreach (var keyValue in _coordinateBoxes)
+            keyValue.Value.CellSize = GetZoomCellSize();
+
     }
 
     public void SetCellSize(float cellSize)
@@ -80,7 +96,8 @@ public class TextureUvSelector : Image
     /// <returns></returns>
     public bool TryAddCoordinateBox(Vector2Int coordinate, Color color, float borderSize = 0.1f)
     {
-        var box = CreateBox(coordinate, color, borderSize);
+        SelectionBox box = new(coordinate, color, GetZoomCellSize(), borderSize);
+
         if (_coordinateBoxes.TryAdd(coordinate, box))
         {
             Add(box);
@@ -92,7 +109,7 @@ public class TextureUvSelector : Image
 
     public bool RemoveCoordinateBox(Vector2Int coordinate)
     {
-        bool success = _coordinateBoxes.Remove(coordinate, out Box box);
+        bool success = _coordinateBoxes.Remove(coordinate, out SelectionBox box);
 
         if (success)
             Remove(box);
@@ -103,7 +120,8 @@ public class TextureUvSelector : Image
     public void UpdateCoordinateBox(Vector2Int coordinate, Color color, float borderSize = 0.1f)
     {
         var box = _coordinateBoxes[coordinate];
-        UpdateCoordinateBox(box, color, borderSize);
+        box.BorderColor = color;
+        box.BorderSize = borderSize;
     }
 
     public void ClearAllCoordinateBoxes()
@@ -112,42 +130,17 @@ public class TextureUvSelector : Image
             RemoveCoordinateBox(_coordinateBoxes.ElementAt(i).Key);
     }
 
-    private void UpdateCoordinateBox(Box box, Color color, float borderSize = 0.1f)
+    private Vector2 GetZoomCellSize()
     {
-        box.style.borderBottomWidth = borderSize;
-        box.style.borderLeftWidth = borderSize;
-        box.style.borderRightWidth = borderSize;
-        box.style.borderTopWidth = borderSize;
-
-        box.style.borderBottomColor = color;
-        box.style.borderLeftColor = color;
-        box.style.borderRightColor = color;
-        box.style.borderTopColor = color;
-    }
-
-    private Box CreateBox(Vector2Int coordinate, Color borderColor, float borderSize = 0.1f)
-    {
-        Box box = new();
-        Vector2 pos = new();
-
-        pos.x = coordinate.x * _cellSize;
-        pos.y = coordinate.y * _cellSize;
-
-        box.transform.position = pos;
-        box.style.height = _cellSize;
-        box.style.width = _cellSize;
-        box.style.position = Position.Absolute;
-
-        UpdateCoordinateBox(box, borderColor, borderSize);
-
-        return box;
+        return _sizeMultiplier * _cellSize;
     }
 
     public Vector2Int CalculateImageCoordinates(Vector2 pos)
     {
         Vector2Int uvCoordinates = new();
-        uvCoordinates.x = Mathf.FloorToInt(pos.x / _cellSize);
-        uvCoordinates.y = Mathf.FloorToInt(pos.y / _cellSize);
+        var zoomCellSize = GetZoomCellSize();
+        uvCoordinates.x = Mathf.FloorToInt(pos.x / zoomCellSize.x);
+        uvCoordinates.y = Mathf.FloorToInt(pos.y / zoomCellSize.y);
 
         Debug.Log($"Column: {uvCoordinates.x} Row: {uvCoordinates.y}");
 

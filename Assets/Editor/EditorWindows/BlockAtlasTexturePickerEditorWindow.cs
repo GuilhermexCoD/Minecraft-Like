@@ -158,30 +158,6 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
         Debug.Log($"{(success ? "Success" : "Failed")} to create Coordinate Box at: {coordinate}");
     }
 
-    private Box CreateSelectImageBox(Vector2Int coordinates, float cellSize, float textureSize, bool isUV = false)
-    {
-        Box box = new Box();
-        Vector2 pos = new();
-
-        pos.x = coordinates.x * cellSize;
-        pos.y = coordinates.y * cellSize;
-
-        if (isUV)
-            pos.y = textureSize - pos.y - cellSize;
-
-        box.transform.position = pos;
-        box.style.height = cellSize;
-        box.style.width = cellSize;
-        box.style.position = Position.Absolute;
-
-        box.style.borderBottomColor = Color.green;
-        box.style.borderLeftColor = Color.green;
-        box.style.borderRightColor = Color.green;
-        box.style.borderTopColor = Color.green;
-
-        return box;
-    }
-
     private void OnBlockDataSelectionChange(IEnumerable<object> selectedItems)
     {
         UpdateInspectorPanel();
@@ -254,9 +230,9 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
 
                 EditorUtility.SetDirty(blockData);
             }
-            
+
         });
-        
+
     }
 
     private bool TryGetSelectedBlockData(out BlockData blockData)
