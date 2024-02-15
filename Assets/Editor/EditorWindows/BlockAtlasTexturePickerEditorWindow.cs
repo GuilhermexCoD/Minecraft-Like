@@ -1,15 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using TMPro.EditorUtilities;
-using Unity.VisualScripting;
 using UnityEditor;
-using UnityEditor.Rendering;
 using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 using static CubeMeshData;
 using Object = UnityEngine.Object;
@@ -117,7 +109,6 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
         if (evt.newValue == null)
             return;
         m_atlasTexture = _atlasObjectField.value as Texture2D;
-        Debug.Log($"Changed Atlas : {evt.newValue.name}");
 
         UpdateAtlasTexture();
     }
@@ -139,23 +130,17 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
 
     private void OnAtlasTexturePointerDown(PointerDownEvent evt)
     {
-        Debug.Log($"Atlas Texture Pointer Down: target {evt.currentTarget} | \n delta Pos {evt.deltaPosition} | \n localPos {evt.localPosition} | \n originalMousePos {evt.originalMousePosition} | \n pos {evt.position}");
-
         var selectedBlockData = _blockDataList.selectedItem as BlockData;
 
         if (selectedBlockData == null)
             return;
 
-        Debug.Log($"x: {evt.localPosition.x} y: {evt.localPosition.y} !y: {_textureUvSelector.image.width - evt.localPosition.y}");
-
         var coordinate = _textureUvSelector.CalculateImageCoordinates(evt.localPosition);
-        var maxRows = _textureUvSelector.GetMaxRows() - 1;
-
-        Debug.Log($"Column: {coordinate.x} Row: {maxRows - coordinate.y}");
 
         bool success = _textureUvSelector.TryAddCoordinateBox(coordinate, Color.green);
 
-        Debug.Log($"{(success ? "Success" : "Failed")} to create Coordinate Box at: {coordinate}");
+        if (!success)
+            Debug.Log($"Failed to create Coordinate Box at: {coordinate}");
     }
 
     private void OnBlockDataSelectionChange(IEnumerable<object> selectedItems)
@@ -193,7 +178,6 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
 
     private void OnFaceButtonPressed(object sender, FaceArgs e)
     {
-        Debug.Log($"Pressed {e.faceOrientation}");
         var localFaceOrientation = e.faceOrientation;
 
         _textureUvSelector.GetCoordinatesOnMouseClick((coordinate) =>
@@ -202,7 +186,6 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
             {
                 var maxRows = _textureUvSelector.GetMaxRows() - 1;
                 var uv = new Vector2Int(coordinate.x, maxRows - coordinate.y);
-                Debug.Log($"{localFaceOrientation} Selected Coordinate:{coordinate} | UV: {uv}");
 
                 switch (localFaceOrientation)
                 {
@@ -265,7 +248,8 @@ public class BlockAtlasTexturePickerEditorWindow : EditorWindow
 
                 bool success = _textureUvSelector.TryAddCoordinateBox(coordinate, Color.blue);
 
-                Debug.Log($"{(success ? "Success" : "Failed")} to create Coordinate Box at: {uv.Value}");
+                if (!success)
+                    Debug.Log($"Failed to create Coordinate Box at: {uv.Value}");
             }
         }
     }

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class CubeMeshData
+public static partial class CubeMeshData
 {
     public const int kFaceCount = 6;
 
@@ -182,16 +182,5 @@ public static class CubeMeshData
             triangles.AddRange(triangleBottom);
             return triangles.ToArray();
         }
-    }
-
-    [System.Flags]
-    public enum FaceOrientation
-    {
-        Front = 1,
-        Top = 2,
-        Back = 4,
-        Bottom = 8,
-        Right = 16,
-        Left = 32,
     }
 }

@@ -14,9 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockName: Dirt
   textureData:
-    textureAtlasId: 0
-    cellSize: 16
-    frontUV: {x: 8, y: 28}
+    textureAtlasData:
+      texture: {fileID: 2800000, guid: 5994f94b6aad7104696de348dbe6a313, type: 3}
+      cellSize: 16
+    frontUV: {x: 8, y: 25}
     topUV: {x: 8, y: 24}
     backUV: {x: 8, y: 25}
     bottomUV: {x: 8, y: 26}

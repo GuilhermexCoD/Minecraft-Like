@@ -4,22 +4,34 @@ using UnityEngine.UIElements;
 
 public class ResizerManipulator : MouseManipulator
 {
-    private Vector2 m_StartSize;
-    private float m_Increment;
-    private float m_Multiplier;
+    private Vector2 _startSize;
+    private float _increment;
+    private float _multiplier;
 
     public event EventHandler<ResizeArgs> onResize;
 
-    public ResizerManipulator(Vector2 initialSize, float multiplier = 1f)
+    public ResizerManipulator(float multiplier = 1f)
     {
-        m_StartSize = initialSize;
-
-        if (multiplier == 0f)
-            m_Multiplier = 1f;
-        else
-            m_Multiplier = multiplier;
+        _multiplier = multiplier;
 
         activators.Add(new ManipulatorActivationFilter { modifiers = EventModifiers.Control });
+    }
+
+    public ResizerManipulator(Vector2 initialSize, float multiplier = 1f)
+    {
+        _startSize = initialSize;
+
+        if (multiplier == 0f)
+            _multiplier = 1f;
+        else
+            _multiplier = multiplier;
+
+        activators.Add(new ManipulatorActivationFilter { modifiers = EventModifiers.Control });
+    }
+
+    public void SetInitialSize(Vector2 initialSize)
+    {
+        _startSize = initialSize;
     }
 
     protected override void RegisterCallbacksOnTarget()
@@ -32,26 +44,25 @@ public class ResizerManipulator : MouseManipulator
         if (CanStartManipulation(evt))
         {
             evt.StopImmediatePropagation();
-            Debug.Log($"On Wheel {nameof(ResizerManipulator)} : Delta: {evt.delta}");
 
-            m_Increment += evt.delta.y * m_Multiplier;
+            _increment += evt.delta.y * _multiplier;
 
-            Vector2 size = new Vector2(m_StartSize.x + m_Increment, m_StartSize.y + m_Increment);
+            Vector2 size = new Vector2(_startSize.x + _increment, _startSize.y + _increment);
             target.style.width = size.x;
             target.style.height = size.y;
 
             onResize?.Invoke(this, new ResizeArgs()
             {
-                sizeDelta = new Vector2(m_StartSize.y + m_Increment, m_StartSize.x + m_Increment),
-                increment = m_Increment,
-                sizeMultiplier = (size / m_StartSize)
+                sizeDelta = new Vector2(_startSize.y + _increment, _startSize.x + _increment),
+                increment = _increment,
+                sizeMultiplier = (size / _startSize)
             });
         }
     }
 
     public void SetMultiplier(float multiplier)
     {
-        m_Multiplier = multiplier;
+        _multiplier = multiplier;
     }
 
     protected override void UnregisterCallbacksFromTarget()

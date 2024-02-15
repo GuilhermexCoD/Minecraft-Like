@@ -5,8 +5,10 @@ using static CubeMeshData;
 [System.Serializable]
 public struct CubeTextureData
 {
-    public int textureAtlasId;
-    public float cellSize;
+    public TextureAtlasData textureAtlasData;
+
+    [HideInInspector] public readonly Texture2D Texture => textureAtlasData.texture;
+    [HideInInspector] public readonly float CellSize => textureAtlasData.cellSize;
 
     [Tooltip("x = Column Index, y = Row Index")]
     public Vector2Int frontUV;

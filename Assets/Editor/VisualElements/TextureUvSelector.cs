@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 public class TextureUvSelector : Image
@@ -14,18 +16,22 @@ public class TextureUvSelector : Image
     private ResizerManipulator _resizerManipulator;
     private Vector2 _sizeMultiplier = Vector2.one;
 
+    public TextureUvSelector() : this(null , 16f)
+    {
+
+    }
+
     public TextureUvSelector(Texture2D texture, float cellSize = 16f)
     {
         _texture = texture;
         _cellSize = cellSize;
 
         style.alignSelf = Align.Center;
-        style.height = _texture.height;
-        style.width = _texture.width;
-        image = _texture;
+
+        SetTexture(texture);
         _sizeMultiplier = Vector2.one;
 
-        _resizerManipulator = new ResizerManipulator(new Vector2(_texture.width, _texture.height), 4f);
+        _resizerManipulator = new ResizerManipulator(4f);
         _resizerManipulator.onResize += OnResizeChange;
         this.AddManipulator(_resizerManipulator);
     }
@@ -39,10 +45,28 @@ public class TextureUvSelector : Image
 
     }
 
+    public void SetTexture(Texture2D texture)
+    {
+        if (texture == null)
+            return;
+
+        _texture = texture;
+
+        style.height = _texture.height;
+        style.width = _texture.width;
+
+        _resizerManipulator.SetInitialSize(new Vector2(_texture.width, _texture.height));
+
+        image = _texture;
+        
+        MarkDirtyRepaint();
+        //TODO Redraw CoordinateBoxes
+    }
+
     public void SetCellSize(float cellSize)
     {
         _cellSize = cellSize;
-
+        MarkDirtyRepaint();
         //TODO Redraw CoordinateBoxes
     }
 
@@ -96,6 +120,9 @@ public class TextureUvSelector : Image
     /// <returns></returns>
     public bool TryAddCoordinateBox(Vector2Int coordinate, Color color, float borderSize = 0.1f)
     {
+        if (_texture == null)
+            return false;
+
         SelectionBox box = new(coordinate, color, GetZoomCellSize(), borderSize);
 
         if (_coordinateBoxes.TryAdd(coordinate, box))
@@ -142,18 +169,22 @@ public class TextureUvSelector : Image
         uvCoordinates.x = Mathf.FloorToInt(pos.x / zoomCellSize.x);
         uvCoordinates.y = Mathf.FloorToInt(pos.y / zoomCellSize.y);
 
-        Debug.Log($"Column: {uvCoordinates.x} Row: {uvCoordinates.y}");
-
         return uvCoordinates;
     }
 
     public int GetMaxRows()
     {
+        if (_texture == null)
+            return 0;
+
         return Mathf.FloorToInt(_texture.height / _cellSize);
     }
 
     public int GetMaxColumns()
     {
+        if (_texture == null)
+            return 0;
+
         return Mathf.FloorToInt(_texture.width / _cellSize);
     }
 

@@ -10,15 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 254c935cda145e44a919987c0b5126d9, type: 3}
-  m_Name: 0.1_0.0
+  m_Name: CraftingTable
   m_EditorClassIdentifier: 
-  blockName: 0.1 0.0
+  blockName: Crafting Table
   textureData:
-    textureAtlasId: 0
-    cellSize: 128
-    frontUV: {x: 9, y: 0}
-    topUV: {x: 0, y: 0}
-    backUV: {x: 0, y: 0}
-    bottomUV: {x: 0, y: 0}
-    rightUV: {x: 0, y: 0}
-    leftUV: {x: 0, y: 0}
+    textureAtlasData:
+      texture: {fileID: 2800000, guid: 5994f94b6aad7104696de348dbe6a313, type: 3}
+      cellSize: 16
+    frontUV: {x: 3, y: 25}
+    topUV: {x: 5, y: 25}
+    backUV: {x: 4, y: 25}
+    bottomUV: {x: 5, y: 25}
+    rightUV: {x: 4, y: 25}
+    leftUV: {x: 4, y: 25}
